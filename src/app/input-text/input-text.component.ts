@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges} from '@angular/core';
+import {Component, forwardRef, Input} from '@angular/core';
 import {ControlValueAccessor, FormControl, NG_VALIDATORS, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 @Component({
@@ -11,7 +11,7 @@ import {ControlValueAccessor, FormControl, NG_VALIDATORS, NG_VALUE_ACCESSOR} fro
         <div class="form-group">
             <label class="form-control-label"> {{label}}: <span
                     class="star">*</span></label>
-            <input type="text" [value]="innerValue" class="form-control"/>
+            <input type="text" [value]="innerValue" class="form-control" (input)="onChange($event)"/>
             <app-show-errors [control]="control"></app-show-errors>
         </div>
     `,
@@ -23,42 +23,21 @@ import {ControlValueAccessor, FormControl, NG_VALIDATORS, NG_VALUE_ACCESSOR} fro
         top: 7px;
     }`]
 })
-export class InputTextComponent implements ControlValueAccessor, OnChanges {
+export class InputTextComponent implements ControlValueAccessor {
 
     @Input() label: string;
 
     private innerValue: string;
 
     private control: FormControl;
+    private propagateChange = (_: any) => { };
 
-    ngOnChanges(inputs) {
-        console.log('change');
-        console.log(inputs);
-        /*
-        if (inputs.counterRangeMax || inputs.counterRangeMin) {
-            this.validateFn = createCounterRangeValidator(this.counterRangeMax, this.counterRangeMin);
-            this.propagateChange(this.counterValue);
-        }
-        */
-    }
-
-    writeValue(obj: any): void {
-        console.log('write');
-        this.value = obj;
-        if (obj) {
-            console.log(obj);
-        }
+    onChange(event) {
+        this.propagateChange(event.target.value);
     }
 
     registerOnChange(fn: any): void {
-        console.log('registerOnChange');
-        console.log(fn);
-    }
-
-    registerOnTouched(fn: any): void {
-    }
-
-    setDisabledState(isDisabled: boolean): void {
+        this.propagateChange = fn;
     }
 
     get value(): any {
@@ -69,6 +48,21 @@ export class InputTextComponent implements ControlValueAccessor, OnChanges {
         if (v !== this.innerValue) {
             this.innerValue = v;
         }
+    }
+
+    writeValue(obj: any): void {
+        console.log('write');
+        this.value = obj;
+        if (obj) {
+            console.log(obj);
+        }
+    }
+
+
+    registerOnTouched(fn: any): void {
+    }
+
+    setDisabledState(isDisabled: boolean): void {
     }
 
     validate(c: FormControl) {
